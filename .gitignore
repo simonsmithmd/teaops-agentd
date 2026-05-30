@@ -1,0 +1,7 @@
+/target
+.env
+*.pid
+*.heartbeat
+*.token
+teaops-*.lock
+.DS_Store
