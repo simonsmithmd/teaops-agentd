@@ -4,4 +4,6 @@
 *.heartbeat
 *.token
 teaops-*.lock
+fetchtest/
+runtime_test/
 .DS_Store
