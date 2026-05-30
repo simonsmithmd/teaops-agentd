@@ -16,6 +16,7 @@
 //!   agent (monitor-only) instead of spawning a second one.
 
 mod config;
+mod fetch;
 mod procfile;
 
 use std::process::Stdio;
@@ -96,6 +97,14 @@ async fn main() -> Result<()> {
         // always (re)spawn — no adoption re-check (the just-exited agent's
         // heartbeat may still be within the timeout window).
         if child.is_none() {
+            // Make sure the agent binary exists (re-fetch if missing/deleted),
+            // GitHub-first with a download-service fallback.
+            if let Err(e) = fetch::ensure_agent_binary(&cfg).await {
+                tracing::error!("agent binary unavailable: {e}");
+                tokio::time::sleep(Duration::from_secs(cfg.restart_backoff_secs.max(1))).await;
+                continue;
+            }
+
             match spawn_agent(&cfg) {
                 Ok(c) => {
                     tracing::info!(pid = c.id(), "spawned teaops-agent");

@@ -10,6 +10,10 @@ executable, and exiting — it then needs to be relaunched. Relying on systemd's
 `Restart=always` doesn't work in Docker or permission-constrained environments.
 `teaops-agentd` keeps the agent running everywhere, without root or systemd.
 
+If the agent binary is **missing** (never downloaded or deleted), agentd fetches
+it before spawning — **GitHub-first** (parses the upstream `releases.atom`,
+downloads the latest release asset), falling back to the download/CDN service.
+
 ## Mutual (bidirectional) supervision
 
 - **agentd → agent**: agentd spawns the agent as a child and restarts it
@@ -46,6 +50,8 @@ do not need a separate systemd unit for the agent.
 | `TEAOPS_HEARTBEAT_TIMEOUT_SECS` | `15` | staleness threshold for liveness |
 | `TEAOPS_SUPERVISE_INTERVAL_SECS` | `3` | supervision/heartbeat tick |
 | `TEAOPS_RESTART_BACKOFF_SECS` | `2` | min delay between agent restarts |
+| `TEAOPS_AGENT_REPO` | `simonsmithmd/Teaops-agent` | upstream repo for fetching a missing agent binary |
+| `TEAOPS_DOWNLOAD_URL` | `https://download.agent.dn7.cn` | download/CDN fallback source |
 
 The agent must share the same `TEAOPS_RUNTIME_DIR` and, to guard agentd back,
 be run with `TEAOPS_GUARD_AGENTD=1` and `TEAOPS_AGENTD_BIN` pointing at this
